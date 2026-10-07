@@ -9,10 +9,9 @@
       font-family: Georgia, serif;
       color: #8b2f4a;
       padding: 20px;
-      text-align: center;
       margin: 0;
     }
-    h1 { font-size: 2.2em; }
+    h1 { font-size: 2.2em; text-align: center; }
     .card {
       background: white;
       border-radius: 15px;
@@ -21,15 +20,60 @@
       max-width: 500px;
       box-shadow: 0 4px 10px rgba(255,105,180,0.2);
     }
+    h2 { margin-top: 0; }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #ffc0cb;
+      font-size: 1em;
+      width: 65%;
+      font-family: inherit;
+    }
+    button {
+      background: #ff69b4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: inherit;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    button:hover { background: #ff1493; }
+    ul { list-style: none; padding: 0; }
+    li {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ffe4ec;
+    }
+    li input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      margin-right: 10px;
+      accent-color: #ff69b4;
+    }
+    li span { flex: 1; font-size: 1.1em; }
+    li.done span { text-decoration: line-through; color: #c48; }
+    .delete {
+      background: none;
+      color: #c48;
+      font-size: 1.2em;
+      padding: 0 10px;
+    }
   </style>
 </head>
 <body>
   <h1>🌸 Pink Palace 🌸</h1>
-  <p>Welcome to my little corner of the internet.</p>
 
   <div class="card">
     <h2>✅ Habits</h2>
-    <p>Coming soon...</p>
+    <div>
+      <input type="text" id="habitInput" placeholder="New habit...">
+      <button onclick="addHabit()">Add</button>
+    </div>
+    <ul id="habitList"></ul>
   </div>
 
   <div class="card">
@@ -41,5 +85,64 @@
     <h2>📚 Books</h2>
     <p>Coming soon...</p>
   </div>
+
+  <script>
+    let habits = JSON.parse(localStorage.getItem('habits') || '[]');
+
+    function save() {
+      localStorage.setItem('habits', JSON.stringify(habits));
+    }
+
+    function render() {
+      const list = document.getElementById('habitList');
+      list.innerHTML = '';
+      habits.forEach((h, i) => {
+        const li = document.createElement('li');
+        if (h.done) li.classList.add('done');
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = h.done;
+        cb.onchange = () => {
+          habits[i].done = cb.checked;
+          save();
+          render();
+        };
+
+        const span = document.createElement('span');
+        span.textContent = h.name;
+
+        const del = document.createElement('button');
+        del.textContent = '✕';
+        del.className = 'delete';
+        del.onclick = () => {
+          habits.splice(i, 1);
+          save();
+          render();
+        };
+
+        li.appendChild(cb);
+        li.appendChild(span);
+        li.appendChild(del);
+        list.appendChild(li);
+      });
+    }
+
+    function addHabit() {
+      const input = document.getElementById('habitInput');
+      const name = input.value.trim();
+      if (!name) return;
+      habits.push({ name: name, done: false });
+      input.value = '';
+      save();
+      render();
+    }
+
+    document.getElementById('habitInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addHabit();
+    });
+
+    render();
+  </script>
 </body>
-  </html>
+</html>
